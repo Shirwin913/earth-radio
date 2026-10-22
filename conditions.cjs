@@ -1,4 +1,14 @@
 const TTL=900000;
+function sampleLocations(lat,lon,span,count){
+ // Sample a spherical disk in a golden-angle pattern, rather than rows/columns.
+ // Query the model at these actual positions; never relocate returned readings.
+ const angle=Math.PI*(3-Math.sqrt(5)),r=Math.PI/180,a=lat*r,b=lon*r;
+ return Array.from({length:count},(_,i)=>{if(i===0)return {lat,lon};const distance=span*r*Math.sqrt(i/(count-1)),bearing=i*angle;
+  const latitude=Math.asin(Math.sin(a)*Math.cos(distance)+Math.cos(a)*Math.sin(distance)*Math.cos(bearing));
+  const longitude=b+Math.atan2(Math.sin(bearing)*Math.sin(distance)*Math.cos(a),Math.cos(distance)-Math.sin(a)*Math.sin(latitude));
+  return {lat:Math.max(-85,Math.min(85,latitude/r)),lon:((longitude/r+540)%360)-180};
+ });
+}
 function parseFronts(text,now=Date.now()){
  const valid=text.match(/VALID\s+(\d{2})(\d{2})(\d{2})Z/);if(!valid)throw Error('Invalid bulletin');
  const year=new Date(now).getUTCFullYear(),month=+valid[1]-1,day=+valid[2],hour=+valid[3];
@@ -24,8 +34,7 @@ function createService(){const cache=new Map(),pending=new Map();let starts=[];
  if(!pending.has(key)){starts=starts.filter(t=>Date.now()-t<60000);if(starts.length>=12||pending.size>=3){reply(429,{error:'wait'});return true}starts.push(Date.now());
  const task=(async()=>{
   if(key==='fronts'){const r=await fetch('https://www.wpc.ncep.noaa.gov/discussions/codsus_hr',{signal:AbortSignal.timeout(18000)});if(!r.ok)throw Error();return parseFronts(await r.text())}
-  const n=kind==='point'?1:kind==='ocean'?7:5,locations=[];
-  for(let y=0;y<n;y++)for(let x=0;x<n;x++)locations.push({lat:Math.max(-85,Math.min(85,lat+(n===1?0:(y/(n-1)-.5)*span*2))),lon:((lon+(n===1?0:(x/(n-1)-.5)*span*2/Math.max(.5,Math.cos(lat*Math.PI/180)))+540)%360)-180});
+  const locations=sampleLocations(lat,lon,span,kind==='point'?1:kind==='ocean'?49:25);
   const marine=kind!=='weather',q=new URLSearchParams({latitude:locations.map(p=>p.lat.toFixed(3)).join(','),longitude:locations.map(p=>p.lon.toFixed(3)).join(','),current:marine?'ocean_current_velocity,ocean_current_direction,wave_height,sea_surface_temperature':'temperature_2m,weather_code,is_day,pressure_msl',timezone:'GMT',forecast_days:'1',...(marine?{cell_selection:'nearest',wind_speed_unit:'ms'}:{})});
   const r=await fetch((marine?'https://marine-api.open-meteo.com/v1/marine?':'https://api.open-meteo.com/v1/forecast?')+q,{signal:AbortSignal.timeout(25000)});if(!r.ok)throw Error('upstream');const raw=await r.json(),data=Array.isArray(raw)?raw:[raw];if(data.length!==locations.length)throw Error('incomplete');
   return {kind,center:{lat,lon},span,fetchedAt:Date.now(),nodes:data.map((d,i)=>({...locations[i],current:d.current||null,units:d.current_units||{},gridLatitude:d.latitude,gridLongitude:d.longitude})),source:marine?'Open-Meteo / Météo-France':'Open-Meteo'};
@@ -33,4 +42,4 @@ function createService(){const cache=new Map(),pending=new Map();let starts=[];
  reply(200,await pending.get(key));
  }catch{reply(502,{error:'source_unavailable'})}return true;
  }return {handle};}
-module.exports={createService,parseFronts};
+module.exports={createService,parseFronts,sampleLocations};

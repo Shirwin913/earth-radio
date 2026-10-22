@@ -1,3 +1,4 @@
+const estimatedFrontsService=require('./estimated-fronts.cjs').createService();
 const conditionsService=require('./conditions.cjs').createService();
 const stormRadiiService=require('./storm-radii.cjs').createService();
 const webcamService=require('./webcams.cjs').createService();
@@ -5,6 +6,7 @@ const shipService=require('./vessels-bundled.cjs').createService();
 const http=require('node:http'),fs=require('node:fs'),path=require('node:path');
 const root=process.env.EARTH_RADIO_ASSET_ROOT||__dirname,port=Number(process.env.PORT||process.env.EARTH_RADIO_PORT)||4186,publicMode=process.env.EARTH_RADIO_PUBLIC==='1',host=publicMode?'0.0.0.0':'127.0.0.1';let cache=new Map();
 const server=http.createServer(async(req,res)=>{const url=new URL(req.url,'http://localhost');const origin=req.headers.origin;if(publicMode){res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('Referrer-Policy','strict-origin-when-cross-origin');if(!['GET','HEAD'].includes(req.method)){res.writeHead(403,{'Content-Type':'application/json'});res.end(JSON.stringify({error:'Public site settings are managed by the owner'}));return}}if(url.pathname==='/api/runtime'){res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify({public:publicMode}));return}if(origin==='null'||/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin||''))res.setHeader('Access-Control-Allow-Origin',origin);if(url.pathname==='/api/health'){res.writeHead(200,{'Content-Type':'application/json'});res.end(JSON.stringify({app:'earth-radio',flights:true,ships:true,version:'ais-bundled-1'}));return}
+if(await estimatedFrontsService.handle(req,res,url))return;
 if(await conditionsService.handle(req,res,url))return;
 if(await stormRadiiService.handle(req,res,url))return;
 if(await webcamService.handle(req,res,url))return;
