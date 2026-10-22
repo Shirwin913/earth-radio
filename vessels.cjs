@@ -22,6 +22,6 @@ function createService(){const configPath=process.env.EARTH_RADIO_CONFIG_PATH||p
  }
  if(req.method==='GET'&&url.pathname==='/api/ships'){const now=Date.now();for(const [id,s]of vessels)if(s.updatedAt&&now-s.updatedAt>1800000)vessels.delete(id);reply(200,{status,configured:Boolean(key),saved:Boolean(saved.apiKey),center,ships:[...vessels.values()].filter(s=>s.type>=70&&s.type<=79&&Number.isFinite(s.lat)&&now-s.updatedAt<600000),unclassified:[...vessels.values()].filter(s=>!s.type).length});return true}reply(404,{error:'Not found'});return true;
  }
- if(key&&center)connect();return {handle,stop};
+ if(process.env.EARTH_RADIO_PUBLIC==='1'){const a=Number(process.env.AIS_CENTER_LAT||25),b=Number(process.env.AIS_CENTER_LON||121);if(Number.isFinite(a)&&Number.isFinite(b)&&Math.abs(a)<=90&&Math.abs(b)<=180)center={lat:a,lon:b}}if(key&&center)connect();return {handle,stop};
 }
 module.exports={createService,mergeMessage,boundingBoxes};

@@ -30,3 +30,18 @@ Windows 啟動器將後端程式複製到使用者 Documents 下的本機執行�
 - storm-radii.cjs：颱風風圈資料
 
 修改前端後重新整理頁面；修改後端後重新啟動。ws 套件使用 MIT 授權，整合檔內保留其授權資訊。尚未為本專案另行指定開源授權。
+
+## 公開網站部署（Render）
+
+專案包含 render.yaml，可用 Render Blueprint 建立免費 Node.js Web Service。
+
+- Build Command：`npm ci --omit=dev`
+- Start Command：`npm start`
+- Health Check：`/api/health`
+- 環境變數 `EARTH_RADIO_PUBLIC=1`：監聽 `0.0.0.0:$PORT`，禁止所有設定寫入請求，並隱藏網頁金鑰設定。
+- 選填機密環境變數：`AISSTREAM_API_KEY`、`WINDY_WEBCAMS_API_KEY`。請在主機控制台設定，不要寫入程式碼、render.yaml 或 GitHub。
+- 貨船公開版共用站主指定區域，可用 `AIS_CENTER_LAT`、`AIS_CENTER_LON` 設定，預設 25、121；訪客不能修改訂閱中心。
+- 未設定金鑰時，貨船和攝影機功能無法取得資料；其他不需金鑰的功能仍可使用。
+- Render 免費服務閒置後可能休眠，重新開啟需等候喚醒，貨船暫存航跡也會重新累積。
+
+GitHub 儲存庫公開程式碼與實際網站部署是分開的步驟。GitHub Pages 僅支援靜態檔案，不能執行本專案的 Node.js API。

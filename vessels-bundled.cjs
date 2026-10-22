@@ -3905,6 +3905,10 @@ function createService() {
     reply(404, { error: "Not found" });
     return true;
   }
+  if (process.env.EARTH_RADIO_PUBLIC === "1") {
+    const a = Number(process.env.AIS_CENTER_LAT || 25), b = Number(process.env.AIS_CENTER_LON || 121);
+    if (Number.isFinite(a) && Number.isFinite(b) && Math.abs(a) <= 90 && Math.abs(b) <= 180) center = { lat: a, lon: b };
+  }
   if (key && center) connect();
   return { handle, stop };
 }

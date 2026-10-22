@@ -1,5 +1,11 @@
 {
   "dependencies": {
     "ws": "^8.22.0"
+  },
+  "scripts": {
+    "start": "node server.cjs"
+  },
+  "engines": {
+    "node": ">=22"
   }
 }

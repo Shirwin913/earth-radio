@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: earth-radio
+    runtime: node
+    plan: free
+    buildCommand: npm ci --omit=dev
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: EARTH_RADIO_PUBLIC
+        value: "1"
