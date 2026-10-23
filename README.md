@@ -80,7 +80,7 @@ GitHub 儲存庫公開程式碼與實際網站部署是分開的步驟。GitHub 
 
 缺少完整經緯度的電台以 radioAnchor 儲存「集合點參考座標」，原 geo_lat / geo_long 保持缺值。優先查詢有資料的城市／縣市（每國優先最多 8 個常見地區）；其餘使用隨附 GeoNames 首都座標；城市優先在本機 GeoNames 城市資料中查找，查不到才呼叫 Open-Meteo Geocoding。查不到時保留清單，不虛構位置。
 
-橘色「概略」集合點可點開選台，鄰近集合點在螢幕上合併；有座標電台維持綠色光點。資料與界面均標示這不是電台地址，不將多個電台隨機散布。資料來源：Radio Browser、Natural Earth（public domain）、GeoNames cities15000 / countryInfo（CC BY 4.0）、Open-Meteo Geocoding、© OpenStreetMap / Photon。國界為低解析參考，未命中時保留反查，不將海上位置任意配給最近國家。
+概略位置使用橘色小光點，外觀整合到地圖電台點；有座標電台維持綠色光點。點概略光點以 UUID 篩選原本探索清單，不新增獨立清單或集合點按鈕。按探索、收藏或輸入搜尋時清除位置篩選；原有音訊不會自動切換。資料與界面均標示這不是電台地址，不將多個電台隨機散布。資料來源：Radio Browser、Natural Earth（public domain）、GeoNames cities15000 / countryInfo（CC BY 4.0）、Open-Meteo Geocoding、© OpenStreetMap / Photon。國界為低解析參考，未命中時保留反查，不將海上位置任意配給最近國家。
 
 
 ## 風場載入與故障提示
